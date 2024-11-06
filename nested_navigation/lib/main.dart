@@ -37,17 +37,21 @@ final GoRouter _router = GoRouter(
                   },
                   routes: <RouteBase>[
                     GoRoute(
-                      path: 'details',
-                      name: 'details',
-                      builder: (BuildContext context, GoRouterState state) {
-                        return const DetailsScreen();
-                      },
-                    ),
-                    GoRoute(
-                        path: 'comment',
+                        path: 'details/:id',
+                        name: 'details',
                         builder: (BuildContext context, GoRouterState state) {
-                          return const CommentScreen();
-                        })
+                          final id = state.pathParameters['id']!;
+                          return DetailsScreen(id);
+                        },
+                        routes: [
+                          GoRoute(
+                              path: 'comment',
+                              name: 'comment',
+                              builder:
+                                  (BuildContext context, GoRouterState state) {
+                                return const CommentScreen();
+                              })
+                        ]),
                   ],
                 ),
               ]),
@@ -173,11 +177,8 @@ class SidePanelWrapper extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      color: Colors.lightBlueAccent,
-      child: Center(
-        child: child,
-      ),
+    return Center(
+      child: child,
     );
   }
 }
@@ -185,65 +186,78 @@ class SidePanelWrapper extends StatelessWidget {
 class TransactionsScreen extends StatelessWidget {
   const TransactionsScreen({super.key});
 
+  void _onItemClick(BuildContext context, int index) {
+    context.go('/home/details/$index');
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: ElevatedButton(
-        onPressed: () => context.go('/home/details'),
-        child: const Text('Go to the Details screen'),
-      ),
+    return ListView.builder(
+      padding: const EdgeInsets.all(20),
+      itemCount: 10,
+      itemBuilder: (context, index) {
+        final item = "Item $index";
+        return ListTile(
+          title: Text(item),
+          trailing: const Icon(Icons.delete),
+          onTap: () => _onItemClick(context, index),
+        );
+      },
     );
   }
 }
 
 /// The details screen
 class DetailsScreen extends StatelessWidget {
-  const DetailsScreen({super.key});
+  const DetailsScreen(this.index, {super.key});
 
-  @override
-  Widget build(BuildContext context) {
-    return const ColoredBox(color: Colors.yellow);
-    // return Scaffold(
-    //   appBar: AppBar(title: const Text('Details Screen')),
-    //   body: Align(
-    //     child: Column(
-    //       mainAxisAlignment: MainAxisAlignment.center,
-    //       children: [
-    //         ElevatedButton(
-    //           onPressed: () => context.go('/'),
-    //           child: const Text('Go back to the Home screen'),
-    //         ),
-    //         const SizedBox(
-    //           height: 16,
-    //         ),
-    //         ElevatedButton(
-    //           onPressed: () => context.go('/comment'),
-    //           child: const Text('Go to comment screen'),
-    //         )
-    //       ],
-    //     ),
-    //   ),
-    // );
-  }
-}
-
-class CommentScreen extends StatelessWidget {
-  /// Constructs a [DetailsScreen]
-  const CommentScreen({super.key});
+  final String index;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Comment Screen')),
+      appBar: AppBar(title: Text('Details Screen $index')),
       body: Align(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             ElevatedButton(
-              onPressed: () => context.go('/'),
+              onPressed: () => context.go('/home'),
               child: const Text('Go back to the Home screen'),
             ),
+            const SizedBox(
+              height: 16,
+            ),
+            ElevatedButton(
+              onPressed: () => context.go('/home/details/$index/comment'),
+              child: const Text('Go to comment screen'),
+            )
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class CommentScreen extends StatelessWidget {
+  const CommentScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return ColoredBox(
+      color: Colors.black,
+      child: Scaffold(
+        appBar: AppBar(title: const Text('Comment Screen')),
+        body: Align(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              ElevatedButton(
+                onPressed: () => context.go('/home'),
+                child: const Text('Go back to the Home screen'),
+              ),
+            ],
+          ),
         ),
       ),
     );
